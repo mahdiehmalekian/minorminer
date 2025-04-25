@@ -18,7 +18,7 @@
 from unittest import TestCase
 
 from dwave_networkx import zephyr_graph
-from minorminer.utils.lattice_embedding.lattice_survey import LatticeSurvey
+from minorminer.utils.zephyr.lattice_embedding.lattice_survey import LatticeSurvey
 from minorminer.utils.zephyr.node_edge import ZShape
 from minorminer.utils.zephyr.survey import ZSE
 

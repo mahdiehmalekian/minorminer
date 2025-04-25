@@ -20,7 +20,7 @@ from itertools import product
 
 import networkx as nx
 from dwave.system import DWaveSampler
-from minorminer.utils.lattice_embedding.auxiliary_coordinates import UWJ, UWKJ, UWKJZ
+from minorminer.utils.zephyr.lattice_embedding.auxiliary_coordinates import UWJ, UWKJ, UWKJZ
 from minorminer.utils.zephyr.node_edge import Edge, ZShape
 from minorminer.utils.zephyr.survey import ZSE, ZSurvey
 

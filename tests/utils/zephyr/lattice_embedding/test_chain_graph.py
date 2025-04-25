@@ -17,8 +17,8 @@
 
 from unittest import TestCase
 
-from minorminer.utils.lattice_embedding.chain import ZephyrVHChain
-from minorminer.utils.lattice_embedding.chain_graph import ZVHChainGraph
+from minorminer.utils.zephyr.lattice_embedding.chain import ZephyrVHChain
+from minorminer.utils.zephyr.lattice_embedding.chain_graph import ZVHChainGraph
 from minorminer.utils.zephyr.node_edge import ZNode
 from minorminer.utils.zephyr.plane_shift import PlaneShift
 

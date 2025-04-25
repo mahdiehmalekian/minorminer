@@ -21,7 +21,7 @@ from functools import cached_property
 from itertools import combinations, combinations_with_replacement, product
 from typing import Iterable, Literal
 
-from minorminer.utils.lattice_embedding.chain import ZephyrVHChain
+from minorminer.utils.zephyr.lattice_embedding.chain import ZephyrVHChain
 from minorminer.utils.zephyr.node_edge import Edge
 
 __all__ = ["ZVHChainGraph"]

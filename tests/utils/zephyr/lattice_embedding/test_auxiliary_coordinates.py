@@ -17,7 +17,7 @@
 
 from unittest import TestCase
 
-from minorminer.utils.lattice_embedding.auxiliary_coordinates import *
+from minorminer.utils.zephyr.lattice_embedding.auxiliary_coordinates import *
 
 
 class TestUWKJZ(TestCase):
