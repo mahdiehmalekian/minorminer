@@ -1,25 +1,42 @@
+# Copyright 2025 D-Wave
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+# ================================================================================================
+
+
 from itertools import product
 from unittest import TestCase
 
-from burnaby.zephyr_utils.node_edge import ZNode
-from burnaby.zephyr_utils.plane_shift import PlaneShift
+from minorminer.utils.zephyr.node_edge import ZNode
+from minorminer.utils.zephyr.plane_shift import ZPlaneShift
 
-from burnaby.cube_embedding._tile.square import get_num_supply_square, square_tiles, square_z_paths
-from burnaby.lattice_embedding import QuoTile
+from minorminer.cube_embedding._tile.square import get_num_supply_square, square_tiles, square_z_paths
+from minorminer._lattice_utils import QuoTile
 
 
 class TestSquareTiles(TestCase):
     def test_main(self):
         atoms_main = [ZNode((2, 3)), ZNode((3, 2))]
         zns_main = [
-            zn + PlaneShift(-2 * i, -2 * j) for zn in atoms_main for i in (0, 1) for j in (0, 1)
+            zn + ZPlaneShift(-2 * i, -2 * j) for zn in atoms_main for i in (0, 1) for j in (0, 1)
         ]
         self.assertEqual(QuoTile(zns=zns_main), square_tiles["main"])
 
     def test_anti(self):
         atoms_anti = ZNode((3, 2)), ZNode((4, 3))
         zns_anti = [
-            zn + PlaneShift(-2 * i, -2 * j) for zn in atoms_anti for i in (0, 1) for j in (0, 1)
+            zn + ZPlaneShift(-2 * i, -2 * j) for zn in atoms_anti for i in (0, 1) for j in (0, 1)
         ]
         self.assertEqual(QuoTile(zns=zns_anti), square_tiles["anti"])
 

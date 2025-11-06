@@ -1,17 +1,35 @@
+# Copyright 2025 D-Wave Systems Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+# ================================================================================================
+
+
+
 from collections import Counter
 from itertools import islice, product
 from unittest import TestCase
 
 from dwave_networkx import zephyr_graph
-from burnaby.zephyr_utils.node_edge import ZNode
+from minorminer.utils.zephyr.node_edge import ZNode
 
-from burnaby.cube_embedding._floor.lz_provider import provider_floor_zpaths
-from burnaby.cube_embedding._floor.trim import trim
-from burnaby.cube_embedding._tile import TileKind, ZCoupling
-from burnaby.cube_embedding._tile.ladder import all_ladder_idx_chains, ladder_tiles
-from burnaby.cube_embedding._tile.square import all_square_idx_chains, square_tiles
-from burnaby.lattice_embedding.auxiliary_coordinates import UWKJ
-from burnaby.lattice_embedding.lattice_survey import ZLatticeSurvey
+from minorminer.cube_embedding._floor.lz_provider import provider_floor_zpaths
+from minorminer.cube_embedding._floor.trim import trim
+from minorminer.cube_embedding._tile import TileKind, ZCoupling
+from minorminer.cube_embedding._tile.ladder import all_ladder_idx_chains, ladder_tiles
+from minorminer.cube_embedding._tile.square import all_square_idx_chains, square_tiles
+from minorminer._lattice_utils import UWKJ, ZLatticeSurvey
+
 
 
 class TestTrim(TestCase):

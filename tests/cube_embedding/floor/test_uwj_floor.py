@@ -1,13 +1,30 @@
+# Copyright 2025 D-Wave Systems Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+# ================================================================================================
+
+
 from unittest import TestCase
 
 from dwave_networkx import zephyr_graph
-from burnaby.zephyr_utils.node_edge import NodeKind, ZNode
-from burnaby.zephyr_utils.plane_shift import PlaneShift
+from minorminer.utils.zephyr.node_edge import NodeKind, ZNode
+from minorminer.utils.zephyr.plane_shift import ZPlaneShift
 
-from burnaby.cube_embedding._floor.uwj_floor import TileCoordIdx, UWJFloor
-from burnaby.cube_embedding._tile.ladder import all_ladder_idx_chains, ladder_tiles
-from burnaby.cube_embedding._tile.square import square_tiles
-from burnaby.lattice_embedding import UWJ, UWKJZ, QuoFloor, ZLatticeSurvey
+from minorminer.cube_embedding._floor.uwj_floor import TileCoordIdx, UWJFloor
+from minorminer.cube_embedding._tile.ladder import all_ladder_idx_chains, ladder_tiles
+from minorminer.cube_embedding._tile.square import square_tiles
+from minorminer._lattice_utils import UWJ, UWKJZ, QuoFloor, ZLatticeSurvey
 
 
 class TestUWJFloor(TestCase):
@@ -88,30 +105,30 @@ class TestUWJFloor(TestCase):
         uwj_floor_corner_indices = UWJFloor.from_qfloor_graph(
             qfloor=self.qfloor, lattice_survey=self.lsurvey
         ).indices
-        qfloor_33 = QuoFloor(tile=self.tile + PlaneShift(3, 3), dim=(4, 4))
+        qfloor_33 = QuoFloor(tile=self.tile + ZPlaneShift(3, 3), dim=(4, 4))
         uwj_floor_indices_33 = UWJFloor.from_qfloor_graph(
             qfloor=qfloor_33, lattice_survey=self.lsurvey
         ).indices
         for dir, dict_dir in uwj_floor_corner_indices.items():
             opposite_dir = NodeKind.HORIZONTAL if dir == NodeKind.VERTICAL else NodeKind.VERTICAL
             self.assertEqual(
-                {idx: node + PlaneShift(3, 3) for idx, node in dict_dir.items()},
+                {idx: node + ZPlaneShift(3, 3) for idx, node in dict_dir.items()},
                 uwj_floor_indices_33[opposite_dir]
                 )
 
-        qfloor_66 = QuoFloor(tile=self.tile + PlaneShift(6, 6), dim=(1, 1))
+        qfloor_66 = QuoFloor(tile=self.tile + ZPlaneShift(6, 6), dim=(1, 1))
         uwj_floor_indices_66 = UWJFloor.from_qfloor_graph(
             qfloor=qfloor_66, lattice_survey=self.lsurvey
         ).indices
         for dir, dict_dir in uwj_floor_corner_indices.items():
             self.assertEqual(
-                {idx: node + PlaneShift(6, 6) for idx, node in dict_dir.items()},
+                {idx: node + ZPlaneShift(6, 6) for idx, node in dict_dir.items()},
                 uwj_floor_indices_66[dir],
             )
 
     def test_get_col_row_nodes(self):
         uwj_floor = UWJFloor.from_qfloor_graph(qfloor=self.qfloor, lattice_survey=self.lsurvey)
-        nodes_corner_shifted_12 = [UWKJZ(*(a + PlaneShift(4, 8)).zcoord) for a in self.tile]
+        nodes_corner_shifted_12 = [UWKJZ(*(a + ZPlaneShift(4, 8)).zcoord) for a in self.tile]
         nodes_12 = uwj_floor.get_col_row_nodes(Lx=2, Ly=3)[(1, 2)]
         for idx_list in nodes_12.values():
             for uwkjz in idx_list:

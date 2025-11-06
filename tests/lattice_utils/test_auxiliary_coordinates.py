@@ -17,7 +17,7 @@
 
 from unittest import TestCase
 
-from burnaby.lattice_embedding.auxiliary_coordinates import *
+from minorminer._lattice_utils.auxiliary_coordinates import *
 
 
 class TestUWKJZ(TestCase):
