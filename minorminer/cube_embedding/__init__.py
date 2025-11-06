@@ -15,7 +15,7 @@
 # ================================================================================================
 
 """
-Provides embedding for cube.
+Provides embedding of a cube (3d lattice) on a graph or sampler with Zephyr topology.
 """
 
 from minorminer.cube_embedding._tile import TileKind, ZCoupling

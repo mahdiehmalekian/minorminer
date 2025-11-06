@@ -14,7 +14,9 @@
 #
 # ================================================================================================
 
-
+"""
+Contains the cube embedding function.
+"""
 
 from itertools import permutations
 
@@ -82,7 +84,7 @@ def find_cube_embedding(
     >>> from minorminer.cube_embedding import find_cube_embedding
     >>> Z3 = zephyr_graph(m=3, t=1)
     >>> emb = find_cube_embedding(Z3)
-    >>> print(len(emb))
+    >>> print(max(emb))
     27
     
 
@@ -118,7 +120,7 @@ def find_cube_embedding(
     prescribed = kwargs.get("prescribed", False)
 
     z_coupling = kwargs.get("z_coupling", ZCoupling.EITHER)
-    if z_coupling is ZCoupling.ONE_ZERO:
+    if z_coupling is ZCoupling.ONE_ZERO: # inner functions are implemented for ZERO_ONE
         order_z = lambda xyz: (xyz[0], xyz[1], (dim[2] - 1 - xyz[2]))
         z_coupling = ZCoupling.ZERO_ONE
     else:
