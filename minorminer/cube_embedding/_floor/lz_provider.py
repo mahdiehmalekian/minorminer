@@ -1,3 +1,20 @@
+# Copyright 2025 D-Wave Systems Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+# ================================================================================================
+
+
 """
 Contains tools to find the floors within a (partially-yielded) Zephyr graph
 which, ignoring the missing internal edges within the tiles, provide a cube embedding of
@@ -9,14 +26,14 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Generator, Literal
 
-from burnaby.zephyr_utils.node_edge import Edge, NodeKind, ZNode
-from burnaby.zephyr_utils.plane_shift import PlaneShift
+from minorminer.utils.zephyr.node_edge import Edge, NodeKind, ZNode
+from minorminer.utils.zephyr.plane_shift import ZPlaneShift
 
-from burnaby.cube_embedding._floor.uwj_floor import QuoFloor, UWJFloor
-from burnaby.cube_embedding._tile import (PathInfo, TileKind, ZCoupling, ladder_idx_chain,
+from minorminer.cube_embedding._floor.uwj_floor import QuoFloor, UWJFloor
+from minorminer.cube_embedding._tile import (PathInfo, TileKind, ZCoupling, ladder_idx_chain,
                                           ladder_tiles, ladder_z_paths, square_idx_chain,
                                           square_tiles, square_z_paths)
-from burnaby.lattice_embedding import QuoTile, ZLatticeSurvey
+from minorminer._lattice_utils import QuoTile, ZLatticeSurvey
 
 __all__ = ["provider_floor_zpaths"]
 
@@ -143,7 +160,7 @@ def provider_floor_zpaths(
     for x_shift, y_shift in [(0, 0), (1, 1)]:
         try:
             dr_corner_zns = [
-                a + PlaneShift(4 * (Lx - 1) + x_shift, 4 * (Ly - 1) + y_shift)
+                a + ZPlaneShift(4 * (Lx - 1) + x_shift, 4 * (Ly - 1) + y_shift)
                 for a in corner_tile00
             ]
         except ValueError:
@@ -154,7 +171,7 @@ def provider_floor_zpaths(
         max_down_shift = (4 * m - max_y_original_box) // 2
         for right_step in range(max_right_shift + 1):
             for down_step in range(max_down_shift + 1):
-                corner_tile = corner_tile00 + PlaneShift(2 * right_step, 2 * down_step)
+                corner_tile = corner_tile00 + ZPlaneShift(2 * right_step, 2 * down_step)
                 qfloor = QuoFloor(tile=corner_tile, dim=(Lx, Ly))
                 uwj_floor_ij = UWJFloor.from_qfloor_graph(
                     qfloor=qfloor, lattice_survey=lattice_survey

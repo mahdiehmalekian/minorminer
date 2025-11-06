@@ -1,12 +1,30 @@
+# Copyright 2025 D-Wave Systems Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+# ================================================================================================
+
+
+
 from itertools import permutations
 
 import dwave_networkx as dnx
 import networkx as nx
 from dwave.system import DWaveSampler
 
-from burnaby.cube_embedding._floor import embed_on_floor_zpath, provider_floor_zpaths
-from burnaby.cube_embedding._tile import TileKind, ZCoupling
-from burnaby.lattice_embedding import ZLatticeSurvey
+from minorminer.cube_embedding._floor import embed_on_floor_zpath, provider_floor_zpaths
+from minorminer.cube_embedding._tile import TileKind, ZCoupling
+from minorminer._lattice_utils import ZLatticeSurvey
 
 __all__ = ["find_cube_embedding"]
 
@@ -61,7 +79,7 @@ def find_cube_embedding(
 
     Example (1):
     >>> from dwave_networkx import zephyr_graph
-    >>> from burnaby.cube_embedding import find_cube_embedding
+    >>> from minorminer.cube_embedding import find_cube_embedding
     >>> Z3 = zephyr_graph(m=3, t=1)
     >>> emb = find_cube_embedding(Z3)
     >>> print(len(emb))
@@ -70,7 +88,7 @@ def find_cube_embedding(
 
     Example (2):
     >>> from dwave_networkx import zephyr_graph
-    >>> from burnaby.cube_embedding import find_cube_embedding
+    >>> from minorminer.cube_embedding import find_cube_embedding
     >>> m, t = 6, 4
     >>> Z6 = zephyr_graph(m=m, t=t)
     >>> emb = find_cube_embedding(Z6, dim=(m, m, 4*t), z_periodic=True)
@@ -204,23 +222,6 @@ def _find_largest_cube_embedding(
                         ``G``'s nodes are labelled as "coordinates"
                         (i.e. have Zephyr coordinates).
 
-    Example (1):
-    >>> from dwave_networkx import zephyr_graph
-    >>> from burnaby.cube_embedding import find_largest_cube_embedding
-    >>> m, t = 6, 4
-    >>> Z6 = zephyr_graph(m=m, t=t)
-    >>> emb = find_largest_cube_embedding(G=Z6, z_periodic=True)
-    >>> print(len(emb))
-    216
-
-    Example (2):
-    >>> from dwave_networkx import zephyr_graph
-    >>> from burnaby.cube_embedding import find_largest_cube_embedding, TileKind
-    >>> m, t = 6, 4
-    >>> Z6 = zephyr_graph(m=m, t=t)
-    >>> emb = find_largest_cube_embedding(G=Z6, z_periodic=True, tile_kind = TileKind.LADDER)
-    >>> print(len(emb))
-    216
     """
 
     lattice_survey = lattice_survey or ZLatticeSurvey(G=G)

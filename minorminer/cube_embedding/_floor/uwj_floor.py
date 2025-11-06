@@ -1,3 +1,20 @@
+# Copyright 2025 D-Wave Systems Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+# ================================================================================================
+
+
 """
 A helper class for working with floors, equipped with tools needed for cube embedding purposes.
 """
@@ -10,11 +27,10 @@ from typing import Iterable, TypedDict
 
 import networkx as nx
 from dwave.system import DWaveSampler
-from burnaby.zephyr_utils.node_edge import Edge, NodeKind, ZNode
-from burnaby.zephyr_utils.plane_shift import PlaneShift
-from burnaby.lattice_embedding import ZSE
+from minorminer.utils.zephyr.node_edge import Edge, NodeKind, ZNode
+from minorminer.utils.zephyr.plane_shift import ZPlaneShift
+from minorminer._lattice_utils import ZSE, UWJ, UWKJZ, QuoFloor, ZLatticeSurvey
 
-from burnaby.lattice_embedding import UWJ, UWKJZ, QuoFloor, ZLatticeSurvey
 
 __all__ = ["UWJFloor"]
 
@@ -116,10 +132,10 @@ class UWJFloor:
             z_start = uwjz.z
             if uwjz.u == 0:  # vertical external path
                 num_copies, z_stretch = Lx, Ly
-                atom_shift = PlaneShift(4, 0)
+                atom_shift = ZPlaneShift(4, 0)
             else:  # horizontal external path
                 num_copies, z_stretch = Ly, Lx
-                atom_shift = PlaneShift(0, 4)
+                atom_shift = ZPlaneShift(0, 4)
             window = ZSE(z_start=z_start, z_end=z_start + z_stretch - 1)
             for dim_num in range(num_copies):
                 uwjz = (node + dim_num * atom_shift).zcoord
@@ -175,7 +191,7 @@ class UWJFloor:
                 uwjz_corner_tile[idx] = node
         for idx, node in uwjz_corner_tile.items():
             for col, row in product(range(Lx), range(Ly)):
-                node_shifted = node + PlaneShift(4 * col, 4 * row)
+                node_shifted = node + ZPlaneShift(4 * col, 4 * row)
                 uwjz_col_row = UWKJZ(*node_shifted.zcoord)
                 perfect_ks = self.floor[uwjz_col_row.uwj]["perfect_ks"]
                 col_row_uwkjz[(col, row)][idx] = [
@@ -234,7 +250,7 @@ class UWJFloor:
             if idx in dict_dir:
                 node_corner = dict_dir[idx]
                 break
-        node_zcoord = (node_corner + PlaneShift(4 * col, 4 * row)).zcoord
+        node_zcoord = (node_corner + ZPlaneShift(4 * col, 4 * row)).zcoord
         return UWJ(u=node_zcoord.u, w=node_zcoord.w, j=node_zcoord.j)
 
     def missing_internal_edges(

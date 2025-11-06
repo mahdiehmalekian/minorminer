@@ -1,3 +1,21 @@
+# Copyright 2025 D-Wave Systems Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+# ================================================================================================
+
+
+
 """
 Contains the tools for "curing" a floor given the z-path on its tiles; i.e. changing the
 order of external paths of the floor within each quotient external paths so that the z-paths
@@ -7,11 +25,11 @@ can be constructed.
 from collections import defaultdict
 from typing import NamedTuple
 
-from burnaby.zephyr_utils.node_edge import Edge
+from minorminer.utils.zephyr.node_edge import Edge
 
-from burnaby.cube_embedding._floor.uwj_floor import TileCoordEdge, UWJFloor
-from burnaby.cube_embedding._tile import PathInfo
-from burnaby.lattice_embedding import UWJ, UWKJ, UWKJZ, ZLatticeSurvey
+from minorminer.cube_embedding._floor.uwj_floor import TileCoordEdge, UWJFloor
+from minorminer.cube_embedding._tile import PathInfo
+from minorminer._lattice_utils import UWJ, UWKJ, UWKJZ, ZLatticeSurvey
 
 
 class EdgeOccInd(NamedTuple):

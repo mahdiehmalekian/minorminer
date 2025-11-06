@@ -1,3 +1,20 @@
+# Copyright 2025 D-Wave Systems Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+# ================================================================================================
+
+
 """
 A collection of tools for ``TileKind.LADDER``
 """
@@ -5,13 +22,13 @@ A collection of tools for ``TileKind.LADDER``
 from itertools import product
 from typing import Generator, Iterable, Literal
 
-from burnaby.zephyr_utils.node_edge import Edge, NodeKind, ZEdge, ZNode
-from burnaby.zephyr_utils.plane_shift import PlaneShift
+from minorminer.utils.zephyr.node_edge import Edge, NodeKind, ZEdge, ZNode
+from minorminer.utils.zephyr.plane_shift import ZPlaneShift
 
-from burnaby.cube_embedding._tile.chain_supply import generate_chain_supply, prune_zeros
-from burnaby.cube_embedding._tile.kind import ZCoupling
-from burnaby.cube_embedding._tile.z_path import PathInfo, parse_seq
-from burnaby.lattice_embedding import QuoTile
+from minorminer.cube_embedding._tile.chain_supply import generate_chain_supply, prune_zeros
+from minorminer.cube_embedding._tile.kind import ZCoupling
+from minorminer.cube_embedding._tile.z_path import PathInfo, parse_seq
+from minorminer._lattice_utils import QuoTile
 
 __all__ = [
     "ladder_tiles",
@@ -23,9 +40,9 @@ ladder_atoms = {"main": (ZNode((0, 1)), ZNode((1, 0))), "anti": (ZNode((3, 0)), 
 ladder_generic_chains: dict[Literal["main", "anti"], set[ZEdge]] = dict()
 for sub_kind, atoms_sub_kind in ladder_atoms.items():
     if sub_kind == "main":
-        shift_sub_kind = PlaneShift(1, 1)
+        shift_sub_kind = ZPlaneShift(1, 1)
     else:
-        shift_sub_kind = PlaneShift(-1, 1)
+        shift_sub_kind = ZPlaneShift(-1, 1)
     ladder_generic_chains[sub_kind] = {
         ZEdge(atoms_sub_kind[0] + k * shift_sub_kind, atoms_sub_kind[1] + k * shift_sub_kind)
         for k in range(4)
