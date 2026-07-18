@@ -44,7 +44,7 @@ def _make_cube_chains(
         dict[tuple[int, int, int], tuple[tuple[int, int, int, int, int], tuple[int, int, int, int, int]]]:
         A dictionary where
             - keys are (x, y, z) corresponding to the nodes of the cube.
-            - Values are pairs of 5-tuples cooresponding to the length-2 chains for each node, expressed
+            - Values are pairs of 5-tuples corresponding to the length-2 chains for each node, expressed
                 in Zephyr coordinates.
     """
     col_row_nodes = uwj_floor.get_col_row_nodes(Lx=Lx, Ly=Ly)

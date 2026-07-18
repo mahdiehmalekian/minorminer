@@ -35,7 +35,7 @@ class UWKJZ(ZephyrCoord):
     It captures the full coordinate of a Zephyr node.
 
     Example:
-    >>> from burnaby.lattice_embedding.auxiliary_coordinates import UWKJZ
+    >>> from minorminer._lattice_utils.auxiliary_coordinates import UWKJZ
     >>> node = UWKJZ(u=0, w=2, k=3, j=1, z=0)
     >>> external_path = node.uwkj
     >>> quotient_external_path = node.uwj
@@ -56,7 +56,7 @@ class UWKJZ(ZephyrCoord):
         return UWJ(u=self.u, w=self.w, j=self.j)
 
     def to_tuple(self) -> tuple[int]:
-        """Rerurns the tuple corresponding to the coordinate."""
+        """Returns the tuple corresponding to the coordinate."""
         return (self.u, self.w, self.k, self.j, self.z)
 
     def __iter__(self) -> Iterator[int]:
@@ -77,7 +77,7 @@ class UWKJ(UWKJZ):
 
     Provides convenient representations and helpers for embedding-related algorithms.
     Example:
-    >>> from burnaby.lattice_embedding.auxiliary_coordinates import UWKJ
+    >>> from minorminer._lattice_utils.auxiliary_coordinates import UWKJ
     >>> external_path = UWKJ(u=0, w=6, k=2, j=1)
     >>> quotient_external_path = external_path.uwj
     >>> print(f"The external path {external_path} belongs to the quotient external path {quotient_external_path}.")
@@ -87,7 +87,7 @@ class UWKJ(UWKJZ):
     _fields = ("u", "w", "k", "j")
 
     def to_tuple(self) -> tuple[int]:
-        """Rerurns the tuple corresponding to the coordinate."""
+        """Returns the tuple corresponding to the coordinate."""
         return (self.u, self.w, self.k, self.j)
 
     def __repr__(self) -> str:
@@ -106,7 +106,7 @@ class UWJ(UWKJ):
     _fields = ("u", "w", "j")
 
     def to_tuple(self) -> tuple[int]:
-        """Rerurns the tuple corresponding to the coordinate."""
+        """Returns the tuple corresponding to the coordinate."""
         return (self.u, self.w, self.j)
 
     def __repr__(self) -> str:

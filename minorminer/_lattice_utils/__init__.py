@@ -26,7 +26,7 @@ This package includes:
    connectivity checks based on z-coupling.
 4. A lattice survey module that provides utilities for embedding lattices
    on partially-yielded Zephyr graphs.
-5. A qoutient tile object to facilitate embedding lattice-type graphs on Zephyr.
+5. A quotient tile object to facilitate embedding lattice-type graphs on Zephyr.
 """
 
 from minorminer._lattice_utils.auxiliary_coordinates import *

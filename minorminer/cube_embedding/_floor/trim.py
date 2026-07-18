@@ -93,7 +93,7 @@ def trim(
             uwkj (UWKJ): The external path to be removed.
             all_cand_uwkj (list[UWKJ]): The list of all external paths than can be removed.
             cr_missing (dict[UWKJ, list[UWKJ]]): A dictionary that maps each external path
-                to the list of external paths it misses a "cucial" connection with.
+                to the list of external paths it misses a "crucial" connection with.
             imp_missing (dict[UWKJ, list[UWKJ]]):  A dictionary that maps each external path
                 to the list of external paths it misses an "important" connection with.
         """

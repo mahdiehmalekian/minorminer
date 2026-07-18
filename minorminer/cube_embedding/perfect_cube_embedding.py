@@ -33,7 +33,7 @@ __all__ = ["find_cube_embedding"]
 
 def find_cube_embedding(
     G: nx.Graph | DWaveSampler,
-    dim: tuple[int, int, int] | None=None,
+    dim: tuple[int, int, int] | None = None,
     z_periodic: bool = False,
     lattice_survey: ZLatticeSurvey | None = None,
     **kwargs,

@@ -266,7 +266,7 @@ def square_z_paths(
         prescribed (bool): If True, restricts chains of the path to square prescribed chains.
         z_coupling (ZCoupling | None, optional): The kind of coupling between chains
             corresponding to consecutive nodes in a z-paths. Defaults to None.
-        indices (dict[int, NodeKind] | None, optional): A dcitionary mapping a node index to its kind. Defaults to None.
+        indices (dict[int, NodeKind] | None, optional): A dictionary mapping a node index to its kind. Defaults to None.
 
     Yields:
         Generator[PathInfo, None, None]: Path constructed using
