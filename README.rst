@@ -59,6 +59,8 @@ pypi. Source distributions are provided as well.
 
 To install from this repository, you will need to first fetch the submodules
 
+.. code-block:: bash
+
     git submodule init
     git submodule update
 

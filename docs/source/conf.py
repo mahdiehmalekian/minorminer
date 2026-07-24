@@ -29,7 +29,7 @@ extensions += ['breathe']
 
 autosummary_generate = True
 
-source_suffix = '.rst'
+source_suffix = {'.rst': 'restructuredtext'}
 
 master_doc = 'index'
 
