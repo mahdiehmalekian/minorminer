@@ -141,6 +141,9 @@ extensions = [
 setup(
     ext_modules=cythonize(extensions),
     packages=['minorminer',
+              'minorminer.embedders',
+              'minorminer.embedders.clique',
+              'minorminer.embedders.clique._zephyr',
               'minorminer.layout',
               'minorminer.utils',
               'minorminer._extern',
