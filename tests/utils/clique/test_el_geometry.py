@@ -2,7 +2,7 @@ import unittest
 
 from parameterized import parameterized
 
-from minorminer.embedders.clique._zephyr.el_geometry import el_template, el_template_length, elbow
+from minorminer.utils._clique.el_geometry import el_template, el_template_length, elbow
 
 _M_CASES = [(m,) for m in (1, 2)]  # small grids
 
