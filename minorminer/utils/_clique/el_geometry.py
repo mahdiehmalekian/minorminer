@@ -66,17 +66,19 @@ QuoSpan = tuple[int, int, int, int]
 
 
 def elbow(m: int, v_x: int, v_y: int, h_x: int, h_y: int) -> tuple[int, int] | None:
-    """The elbow of the L-path from vertical block ``(v_x, v_y)`` to horizontal block
-    ``(h_x, h_y)``: the two blocks joined by the single internal coupler that bridges the vertical
-    arm to the horizontal arm.
+    """The elbow of the L-path from a vertical block to horizontal block.
 
-    Those two blocks are ``vp = (v_x, vp_y)`` on the vertical path and ``hp = (hp_x, h_y)`` on the
-    horizontal path. Only their varying coordinates vary, so we return ``(vp_y, hp_x)``.
+    The elbow is the two blocks ``(v_x, v_y)`` and ``(h_x, h_y)`` joined by the single internal
+    coupler that bridges the vertical arm to the horizontal arm. Those two blocks are
+    ``vp = (v_x, vp_y)`` on the vertical path and ``hp = (hp_x, h_y)`` on the horizontal path. Only
+    their varying coordinates vary, so we return ``(vp_y, hp_x)``.
 
     Args:
         m: Zephyr grid size.
-        v_x, v_y: block coordinates of the vertical block (``v_x`` even).
-        h_x, h_y: block coordinates of the horizontal block (``h_x`` odd).
+        v_x: x-coordinate of the vertical block
+        v_y: y-coordinate of the vertical block
+        h_x: x-coordinate of the horizontal block
+        h_y: y-coordinate of the horizontal block
 
     Returns:
         tuple[int, int] | None: ``(vp_y, hp_x)``, or ``None`` if there is no such elbow.
@@ -98,8 +100,7 @@ def elbow(m: int, v_x: int, v_y: int, h_x: int, h_y: int) -> tuple[int, int] | N
 def el_template(
     m: int, v_x: int, v_y: int, h_x: int, h_y: int
 ) -> tuple[int, int, QuoSpan, QuoSpan] | None:
-    """The el-template that vertical block ``(v_x, v_y)`` and horizontal block ``(h_x, h_y)``
-    induce, or ``None`` if there is no edge between the two quotient external paths.
+    """The el-template that a vertical block and a horizontal block induce.
 
     Args:
         m: grid size of Zephyr
@@ -132,8 +133,7 @@ def el_template(
 
 
 def el_template_length(m: int, v_quo: QuoSpan, h_quo: QuoSpan) -> int | None:
-    """Block count of the el-template ``(v_quo, h_quo)``, or ``None`` if the pair is not a real
-    el-template.
+    """Block count of the el-template.
 
     Args:
         m: grid size of Zephyr
