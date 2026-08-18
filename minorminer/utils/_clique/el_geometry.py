@@ -81,7 +81,7 @@ def elbow(m: int, v_x: int, v_y: int, h_x: int, h_y: int) -> tuple[int, int] | N
         h_y: y-coordinate of the horizontal block
 
     Returns:
-        tuple[int, int] | None: ``(vp_y, hp_x)``, or ``None`` if there is no such elbow.
+        ``(vp_y, hp_x)``, or ``None`` if there is no such elbow.
     """
     abs_max = 4 * m
     x_diff = abs(v_x - h_x)
@@ -110,8 +110,8 @@ def el_template(
         h_y: y-coordinate of the horizontal block
 
     Returns:
-        tuple[int, int, QuoSpan, QuoSpan] | None: ``None`` if the two quotient external paths have
-        no edge between any of their blocks. Otherwise the elbow coordinates and the two arm spans:
+        ``None`` if the two quotient external paths have no edge between any of their blocks.
+        Otherwise the elbow coordinates and the two arm spans:
 
         * ``vp_y`` -- y-coordinate of the block on the vertical quotient path with an edge to a
           block on the horizontal quotient path
@@ -141,7 +141,7 @@ def el_template_length(m: int, v_quo: QuoSpan, h_quo: QuoSpan) -> int | None:
         h_quo: the horizontal arm of the el-template
 
     Returns:
-        int | None: Block count of the el-template ``(v_quo, h_quo)``, or ``None`` if the pair is
+        Block count of the el-template ``(v_quo, h_quo)``, or ``None`` if the pair is
         not a real el-template.
     """
     v_x, v_y_shift, v_a, v_b = v_quo
