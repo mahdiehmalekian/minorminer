@@ -78,6 +78,7 @@ Construction
 
 from __future__ import annotations
 
+import numbers
 from collections.abc import Callable, Iterable
 from operator import itemgetter
 from typing import TYPE_CHECKING
@@ -86,7 +87,6 @@ from dwave.graphs import zephyr_coordinates
 
 from minorminer.utils._clique import el_geometry
 from minorminer.utils._clique.el_geometry import QuoSpan
-import numbers
 
 if TYPE_CHECKING:
     import networkx as nx
@@ -136,16 +136,17 @@ class Grid:
         self._el_cache: dict[tuple[Node, Node], tuple[QuoSpan, QuoSpan, int, int] | None] = {}
 
         if self.labels == "int":
-            present_r = set(G.nodes())
-            self._classify(present_r)
+            present_linear = set(G.nodes())
+            self._classify_present_linear(present_linear)
             edges = {(a, b) if a < b else (b, a) for a, b in G.edges()}
         else:  # tuple nodes: cartesian (x, y, k) directly, or Zephyr 5-tuples to convert
             if self.labels == "coordinates":
                 to_cartesian = zephyr_coordinates.zephyr_to_cartesian
             else:  # cartesian: nodes are already (x, y, k)
                 to_cartesian = lambda node: node
-            self._classify_from_present_nodes({to_cartesian(n) for n in G.nodes()})
-            # node edges -> cartesian -> linear r pairs (internal edge set stays linear)
+            self._classify_present_cartesian({to_cartesian(n) for n in G.nodes()})
+            # node edges -> cartesian -> linear-coordinate pairs (the edge set is always stored
+            # by linear coordinate, regardless of input label mode)
             edges = set()
             for node_a, node_b in G.edges():
                 lcoord_a = self.cartesian_to_linear(to_cartesian(node_a))
@@ -163,40 +164,48 @@ class Grid:
         self.runs = self._survey_ext()
         self.pos = self._position_quo()
 
-    def _classify(self, present_r: set[int]) -> None:
-        """Sort every ideal-lattice node into its kind bucket, in linear-index order.
+    def _classify_present_linear(self, present_nodes_linear: set[int]) -> None:
+        """Sort every ideal-Zephyr node into its kind bucket, in linear-coordinate order.
 
-        Walks the full ideal lattice, filing each node under present_qubits[kind] or
-        missing_qubits[kind] and recording each present node's linear index r. A node is present iff
-        its linear index r is in present_r.
+        Walks the full ideal Zephyr, filing each node under present_qubits[kind] or
+        missing_qubits[kind] and recording each present node's linear coordinate. A node is present iff
+        its linear coordinate is in present_nodes_linear.
 
-        The walk order is what DEFINES r, and it must match the graph's own indexing exactly --
-        verticals first (``x = 0, 2, ...``; for each ``k``, the ``y % 4 == 1`` nodes then the
-        ``y % 4 == 3`` nodes), then horizontals (``y = 0, 2, ...``; for each ``k``, ``x % 4 == 1``
-        then ``x % 4 == 3``). Do not reorder without re-verifying r.
+        Args:
+            present_nodes_linear: The present qubits represented with their linear coordinates.
         """
-        self._walk(lambda r, node: r in present_r)
+        self._walk(lambda lcoord, ccoord: lcoord in present_nodes_linear)
 
-    def _classify_from_present_nodes(self, present_nodes: set[Node]) -> None:
-        """Classify by cartesian node membership instead of by linear index.
+    def _classify_present_cartesian(self, present_nodes_cartesian: set[Node]) -> None:
+        """Classify by cartesian-node membership instead of by linear coordinate.
 
-        Same lattice walk / r numbering as _classify, but a node is present iff its cartesian
-        ``(x, y, k)`` is in present_nodes (used for coordinate-labeled graphs, where presence is
-        known by node, not by linear index).
+        Same Zephyr walk / linear-coordinate numbering as :meth:`._classify_present_linear`, but a
+        node is present iff its cartesian ``(x, y, k)`` is in present_nodes_cartesian (used for
+        coordinate-labeled graphs, where presence is known by node, not by linear coordinate).
+
+        Args:
+            present_nodes_cartesian: The present qubits represented with their cartesian coordinates.
         """
-        self._walk(lambda r, node: node in present_nodes)
+        self._walk(lambda lcoord, ccoord: ccoord in present_nodes_cartesian)
 
-    def _walk(self, is_present: Callable[[int, Node], bool]) -> None:
-        """Assign linear index r to every ideal node and file it as present or missing.
+    def _walk(self, is_present_fn: Callable[[int, Node], bool]) -> None:
+        """Assign a linear coordinate to every ideal-Zephyr node and file it as present or missing.
 
-        Shared by both classify entry points: walks the canonical order and applies the
-        is_present(r, node) predicate. Populates present_qubits[kind] and finalizes
+        The walk order is what DEFINES each node's linear coordinate, and it must match the graph's
+        own indexing exactly -- verticals first, then horizontals.
+
+        Shared by both classify entry points: Walks the canonical order and applies the
+        is_present_fn(lcoord, node) function. Populates present_qubits[kind] and finalizes
         missing_qubits[kind] as frozensets (membership tests are the only downstream use).
+
+        Args:
+            is_present_fn: A function ``(lcoord, node) -> bool`` deciding whether the node at linear
+                coordinate ``lcoord`` with cartesian coordinate ``node`` is present.
         """
         m, t = self.m, self.t
         num_w = 2 * m + 1
         present, missing = self.present_qubits, self.missing_qubits
-        r = 0
+        lcoord = 0
         for w in range(num_w):
             x = 2 * w
             for k in range(t):
@@ -204,11 +213,11 @@ class Grid:
                     kind_present, kind_missing = present[kind], missing[kind]
                     for z in range(m):
                         node = (x, 4 * z + shift, k)
-                        if is_present(r, node):
-                            kind_present[node] = r
+                        if is_present_fn(lcoord, node):
+                            kind_present[node] = lcoord
                         else:
                             kind_missing.add(node)
-                        r += 1
+                        lcoord += 1
         for w in range(num_w):
             y = 2 * w
             for k in range(t):
@@ -216,21 +225,27 @@ class Grid:
                     kind_present, kind_missing = present[kind], missing[kind]
                     for z in range(m):
                         node = (4 * z + shift, y, k)
-                        if is_present(r, node):
-                            kind_present[node] = r
+                        if is_present_fn(lcoord, node):
+                            kind_present[node] = lcoord
                         else:
                             kind_missing.add(node)
-                        r += 1
+                        lcoord += 1
 
         # freeze the missing buckets as soon as they're built: membership tests are
         # the only downstream use, and frozenset makes the immutability explicit
         self.missing_qubits = {k: frozenset(s) for k, s in self.missing_qubits.items()}
 
     def kind_of(self, ccoord: Node) -> str:
-        """Return the kind ("v1"/"v3"/"h1"/"h3") of a cartesian coord from its parity.
+        """Return the kind ("v1"/"v3"/"h1"/"h3") of a cartesian coord.
 
         ``x`` even -> vertical (``v1 if y % 4 == 1 else v3``); ``x`` odd -> horizontal
         (``h1 if x % 4 == 1 else h3``). Pure coordinate arithmetic; no lookup.
+
+        Args:
+            ccoord: A node represented with its cartesian coordinate.
+
+        Returns:
+            The node's kind, one of ``"v1"``, ``"v3"``, ``"h1"``, ``"h3"``.
         """
         x, y, _ = ccoord
         if (x & 1) == 0:
@@ -238,24 +253,51 @@ class Grid:
         return "h1" if (x & 3) == 1 else "h3"
 
     def cartesian_to_linear(self, ccoord: Node) -> int | None:
-        """Linear index (lcoord) of a present cartesian coord, or None if absent/missing."""
+        """Linear coordinate of a present node, or None if absent/missing.
+
+        Args:
+            ccoord: A node represented with its cartesian coordinate.
+
+        Returns:
+            The linear coordinate of ``ccoord``, or ``None`` if the ``ccoord`` is absent.
+        """
         return self.present_qubits[self.kind_of(ccoord)].get(ccoord)
 
     def is_present(self, ccoord: Node) -> bool:
-        """True if the cartesian coord exists in the (faulty) grid."""
+        """True if the cartesian coord exists in the (faulty) grid.
+
+        Args:
+            ccoord: A node with its cartesian coordinate.
+
+        Returns:
+            ``True`` if ``ccoord`` exists in the faulty grid, else ``False``.
+        """
         return ccoord in self.present_qubits[self.kind_of(ccoord)]
 
     def has_edge(self, lcoord1: int, lcoord2: int) -> bool:
-        """True if a coupler exists between linear indices lcoord1 and lcoord2.
+        """Decides if a coupler exists between two nodes.
 
-        Order-independent.
+        Args:
+            lcoord1: One endpoint's linear coordinate.
+            lcoord2: The other endpoint's linear coordinate.
+
+        Returns:
+            ``True`` if there is a coupler between the two nodes, else ``False``.
         """
         e = (lcoord1, lcoord2) if lcoord1 < lcoord2 else (lcoord2, lcoord1)
         return e in self.edges
 
     # Ideal, fault-independent geometry, computed on demand.
     def el_template_length(self, v_quo: QuoSpan, h_quo: QuoSpan) -> int | None:
-        """Block count of the el_template ``(v_quo, h_quo)``, or None if it is not a real one."""
+        """Block count of the el_template ``(v_quo, h_quo)``, or None if it is not a real one.
+
+        Args:
+            v_quo: The vertical arm of the el-template.
+            h_quo: The horizontal arm of the el-template.
+
+        Returns:
+            The block count, or ``None`` if the pair is not a real el-template.
+        """
         return el_geometry.el_template_length(self.m, v_quo, h_quo)
 
     def _missing_internal_couplers(
@@ -266,16 +308,19 @@ class Grid:
         Internal couplers join a vertical node ``v = (x, y, k)`` to a horizontal node
         ``hp = (x+-1, y+-1, kp)`` for every ``kp in range(t)``. For each present vertical node and
         each of its four diagonal horizontal neighbours (in bounds, present), we check whether the
-        coupler exists in ``edges``; if not, record it. Returns ``{(v, hp): (v_base, hp_base)}``
-        where the values are the quotient (``k``-folded) descriptors ``(x, v_shift, k)`` and
-        ``(hp_shift, hp_y, kp)``.
+        coupler exists in ``edges``; if not, record it.
+
+        Returns:
+            ``{(v, hp): (v_base, hp_base)}`` mapping each missing internal coupler (vertical node
+            ``v``, horizontal node ``hp``) to the quotient (``k``-folded) descriptors
+            ``v_base = (x, v_shift, k)`` and ``hp_base = (hp_shift, hp_y, kp)``.
         """
         abs_min, abs_max, t = self.abs_min, self.abs_max, self.t
         edges, present, missing = self.edges, self.present_qubits, self.missing_qubits
         krange = range(t)
         missing_couplers = {}
         for v_shift, v_kind in _V_KIND_BY_SHIFT.items():
-            for v, v_r in present[v_kind].items():
+            for v, v_lcoord in present[v_kind].items():
                 x, y, k = v
                 for dx, dy in _INTERNAL_COUPLER_OFFSETS:
                     hp_x = x + dx
@@ -295,8 +340,10 @@ class Grid:
                         hp = (hp_x, hp_y, kp)
                         if hp in hp_missing:
                             continue
-                        hp_r = hp_nodes[hp]
-                        coupler = (v_r, hp_r) if v_r < hp_r else (hp_r, v_r)
+                        hp_lcoord = hp_nodes[hp]
+                        coupler = (
+                            (v_lcoord, hp_lcoord) if v_lcoord < hp_lcoord else (hp_lcoord, v_lcoord)
+                        )
                         if coupler not in edges:
                             missing_couplers[(v, hp)] = (v_base, (hp_shift, hp_y, kp))
         return missing_couplers
@@ -309,14 +356,15 @@ class Grid:
         the connecting external coupler is present; a break (missing node or missing coupler) ends
         the current run and starts scanning for the next one.
 
-        Returns runs, where ``runs[kind][coord][k]`` -> set of ``(start, end)`` run intervals. This
-        nested shape mirrors how nodes are keyed (``kind -> coord -> k``) and is what el_reachable
-        and _position_quo consume.
+        Returns:
+            ``runs[kind][coord][k]`` -> set of ``(start, end)`` run intervals. This nested shape
+            mirrors how nodes are keyed (``kind -> coord -> k``) and is what :meth:`el_reachable`
+            and :meth:`_position_quo` consume.
         """
         abs_min, abs_max, t = self.abs_min, self.abs_max, self.t
         edges, present, missing = self.edges, self.present_qubits, self.missing_qubits
         runs = {k: {} for k in _NODE_KINDS}
-        for is_vertical, kind_by_shift in ((True, _V_KIND_BY_SHIFT), (False, _H_KIND_BY_SHIFT)):
+        for vertical, kind_by_shift in ((True, _V_KIND_BY_SHIFT), (False, _H_KIND_BY_SHIFT)):
             for shift, kind in kind_by_shift.items():
                 kind_nodes, kind_missing = present[kind], missing[kind]
                 for fixed_coord in range(abs_min, abs_max + 1, 2):
@@ -325,7 +373,7 @@ class Grid:
                         runs_for_k = set()
                         coord = shift
                         while coord <= abs_max:
-                            if is_vertical:
+                            if vertical:
                                 node = (fixed_coord, coord, k)
                             else:
                                 node = (coord, fixed_coord, k)
@@ -335,7 +383,7 @@ class Grid:
                                 end = prev
                                 next_coord = None
                                 while prev + inc <= abs_max:
-                                    if is_vertical:
+                                    if vertical:
                                         previous_node = (fixed_coord, prev, k)
                                         next_node = (fixed_coord, prev + inc, k)
                                     else:
@@ -379,7 +427,14 @@ class Grid:
         Lazy + memoized. The block pair determines the el_template uniquely; the el_template is
         computed on demand, so a query is a handful of arithmetic ops. Results (including ``None``,
         for unreachable) are cached, so repeated queries across overlapping windows in a sweep are
-        effectively free. Returns ``(v_quo_span, h_quo_span, v_k, h_k)`` if reachable, else None.
+        effectively free.
+
+        Args:
+            v: The vertical endpoint.
+            h: The horizontal endpoint.
+
+        Returns:
+            ``(v_quo_span, h_quo_span, v_k, h_k)`` if ``v`` and ``h`` are reachable, else ``None``.
         """
         cache = self._el_cache
         hit = cache.get((v, h), _EL_REACHABLE_NOT_CACHED)
@@ -436,10 +491,11 @@ class Grid:
         left ("l") and right ("r"). The ``k``'s are ranked by that distance and reassigned physical
         positions via the Zephyr index formula, so downstream "position order" == "reach order".
         This is what lets the sliding-window embedding turn a 2D non-crossing constraint into a 1D
-        longest-increasing-subsequence problem.
+        longest-increasing-subsequence problem. Reads self.runs.
 
-        Returns ``{side: {(x, y): {orig_k: pos}}}`` for ``side in {"r", "l", "b", "t"}``.
-        Coordinates covered by no run get an empty ``{}``. Consumes self.runs.
+        Returns:
+            ``{side: {(x, y): {orig_k: pos}}}`` for ``side in {"r", "l", "b", "t"}``.
+            Coordinates covered by no run get an empty ``{}``.
         """
         abs_max, t = self.abs_max, self.t
         runs = self.runs
@@ -510,6 +566,14 @@ def _covers(runs_for_k: Iterable[Run], a: int, b: int) -> bool:
 
     That is, ``start <= a and end >= b``. Used to test whether the faulty grid provides an intact
     stretch long enough for an el_template's required quo_span.
+
+    Args:
+        runs_for_k: The runs ``(start, end)`` on one ``(kind, fixed_coord, k)`` line.
+        a: Lower endpoint of the span that must be covered.
+        b: Upper endpoint of the span that must be covered.
+
+    Returns:
+        ``True`` if some run satisfies ``start <= a and end >= b``, else ``False``.
     """
     for s, e in runs_for_k:
         if s <= a and e >= b:
@@ -518,17 +582,28 @@ def _covers(runs_for_k: Iterable[Run], a: int, b: int) -> bool:
 
 
 def _ranked_pos_fast(
-    x: int, y: int, reach_by_k: dict[int, int], t: int, is_vertical: bool
+    x: int, y: int, reach_by_k: dict[int, int], t: int, vertical: bool
 ) -> dict[int, tuple[int, int]]:
-    """Rank the ``k``'s in reach_by_k by reach distance and assign each a position.
+    """Rank the ``k``'s in reach_by_k by reach distance and assign each a Zephyr position.
 
     Ranking is by ascending reach distance; each ``k`` then gets the closed-form Zephyr index for
     its rank, with the constant part of the formula hoisted out of the loop: within one ``(x, y)``
     only the ``2*rank`` term varies, so the base is computed once and the varying value steps by 2
-    per rank. Returns ``{orig_k: (a, b)}``; is_vertical selects which tuple slot carries the varying
-    value (verticals -> slot 0, horizontals -> slot 1).
+    per rank.
+
+    Args:
+        x: The x coordinate of the line being ranked.
+        y: The y coordinate of the line being ranked.
+        reach_by_k: Maps each present ``k`` on this line to its reach distance to the near run end.
+        t: The Zephyr tile size (number of parallel qubits per line).
+        vertical: ``True`` for a vertical line, ``False`` for a horizontal one; selects which
+            slot of the returned tuple carries the varying position value (vertical -> slot 0,
+            horizontal -> slot 1).
+
+    Returns:
+        ``{orig_k: (a, b)}`` mapping each ``k`` to its assigned Zephyr position tuple.
     """
-    if is_vertical:
+    if vertical:
         j = ((y - 1) & 3) // 2  # Zephyr j of this line
         fixed_val = 2 * (t + 1) * (j + 2 * (y // 4))
         varying_base = 1 + (t + 1) * x + j
@@ -561,7 +636,7 @@ def _parse_zephyr_metadata(G: nx.Graph) -> tuple[int, int, str]:
         G: A networkx Zephyr graph.
 
     Returns:
-        ``(m, t, labels)``: the Zephyr grid size, the tile size, and the label mode.
+        ``(m, t, labels)``: The Zephyr grid size, the tile size, and the label mode.
 
     Raises:
         ValueError: If the graph is not a Zephyr graph, lacks size metadata, or has nodes of an
