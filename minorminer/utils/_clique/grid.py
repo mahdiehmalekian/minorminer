@@ -235,6 +235,17 @@ class Grid:
         # the only downstream use, and frozenset makes the immutability explicit
         self.missing_qubits = {k: frozenset(s) for k, s in self.missing_qubits.items()}
 
+    def is_vertical(self, ccoord: Node) -> bool:
+            """Decides whether a node is vertical.
+
+            Args:
+                ccoord: A node represented with its cartesian coordinate.
+
+            Returns:
+                ``True`` if the node is vertical, else ``False``.
+            """
+            return (ccoord[0] & 1) == 0
+
     def kind_of(self, ccoord: Node) -> str:
         """Return the kind ("v1"/"v3"/"h1"/"h3") of a cartesian coord.
 
@@ -248,7 +259,7 @@ class Grid:
             The node's kind, one of ``"v1"``, ``"v3"``, ``"h1"``, ``"h3"``.
         """
         x, y, _ = ccoord
-        if (x & 1) == 0:
+        if self.is_vertical(ccoord):
             return "v1" if (y & 3) == 1 else "v3"
         return "h1" if (x & 3) == 1 else "h3"
 
