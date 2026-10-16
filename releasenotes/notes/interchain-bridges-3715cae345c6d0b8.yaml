@@ -1,0 +1,13 @@
+---
+features:
+  - |
+    Add ``minorminer.utils._clique.interchain_bridges``, providing
+    ``find_interchain_bridges`` and its helper ``neighbors``. An interchain
+    bridge between two chains is the sequence of internal nodes of a path that
+    starts in one chain, ends in the other, and passes only through qubits not
+    used by any chain. ``find_interchain_bridges`` returns every distinct bridge
+    of at most two qubits between two chains in a (possibly faulty) Zephyr
+    graph, fewest qubits first; the clique embedder uses these bridges to
+    reconnect chain pairs left unconnected by missing couplers.
+    ``neighbors`` returns the present neighbors of a qubit over all working
+    couplers.
